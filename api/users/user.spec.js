@@ -4,8 +4,17 @@
 const request = require('supertest');
 const should = require('should');
 const app = require('../../');
+const models = require('../../models');
 
+/**
+ 	it.only, describe.only : 해당 테스트만 진행한다.
+ */
 describe('GET /users는', () => {
+	// ** DB 연동 **
+	// mocha에서는 done을 안쓰고 return으로 처리해도 비동기를 처리해 준다
+	const users = [{ name: 'alice' }, { name: 'bek' }, { name: 'chris' }];
+	before(() => models.sequelize.sync({ force: true }));
+	before(() => models.User.bulkCreate(users)); // 임시 데이터를 추가
 	describe('성공 시', () => {
 		// done : 비동기 테스트일때 넣어준다
 		it('유저 객체를 담은 배열을 응답한다 ', done => {
@@ -38,6 +47,9 @@ describe('GET /users는', () => {
 });
 
 describe('Get /users/:id 은 ', () => {
+	const users = [{ name: 'alice' }, { name: 'bek' }, { name: 'chris' }];
+	before(() => models.sequelize.sync({ force: true }));
+	before(() => models.User.bulkCreate(users)); // 임시 데이터를 추가
 	describe('성공 시 ', () => {
 		it('id가 1인 객체를 반환한다', done => {
 			request(app)
@@ -67,6 +79,9 @@ describe('Get /users/:id 은 ', () => {
 });
 
 describe('DELETE /users/:id 은', () => {
+	const users = [{ name: 'alice' }, { name: 'bek' }, { name: 'chris' }];
+	before(() => models.sequelize.sync({ force: true }));
+	before(() => models.User.bulkCreate(users)); // 임시 데이터를 추가
 	describe('성공 시 ', () => {
 		it('204를 응답한다.', done => {
 			request(app)
@@ -87,6 +102,9 @@ describe('DELETE /users/:id 은', () => {
 });
 
 describe('POST /users', () => {
+	const users = [{ name: 'alice' }, { name: 'bek' }, { name: 'chris' }];
+	before(() => models.sequelize.sync({ force: true }));
+	before(() => models.User.bulkCreate(users)); // 임시 데이터를 추가
 	describe('성공 시', () => {
 		let name = 'daniel';
 		let body;
@@ -130,7 +148,10 @@ describe('POST /users', () => {
 	});
 });
 
-describe('PUT /users/:id', () => {
+describe.only('PUT /users/:id', () => {
+	const users = [{ name: 'alice' }, { name: 'bek' }, { name: 'chris' }];
+	before(() => models.sequelize.sync({ force: true }));
+	before(() => models.User.bulkCreate(users)); // 임시 데이터를 추가
 	describe('성공 시', () => {
 		const name = 'chally';
 		it('변경된 name을 응답한다.', done => {
@@ -170,8 +191,8 @@ describe('PUT /users/:id', () => {
 
 		it('이름이 중복일 경우 409를 응답한다.', done => {
 			request(app)
-				.put('/users/2')
-				.send({ name: 'Messi' })
+				.put('/users/3')
+				.send({ name: 'bek' })
 				.expect(409)
 				.end(done);
 		});
